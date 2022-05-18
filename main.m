@@ -39,8 +39,6 @@
 %   Configuration files may be edited and managed in the Configurations
 %   folder following the 'config_example.m' file structure.
 %
-%   Beware configurations files are scripts, not functions.
-%
 % File Structure of this project:
 %   Configuration/
 %       config_example.m            example configuration
@@ -55,7 +53,7 @@
 %       constants.m                 contains all physical constants
 %       
 % Data Structure:
-%   s       (struct)    
+%   s       (struct)    main project setting
 %   par     (struct)    contains all parameters
 %   res     (struct)    contains all results
 %
@@ -67,7 +65,13 @@ addpath(genpath('.')); % use restoredefaultpath to reinitialize
 clc; close all; clear;
 
 % 1 to display logs in command window (verbose mode) / 0 for no log
-s.verb1 = 0; % debugging
+s.verb1 = 0; % (bool) debugging
+
+s.print2pdf = 0; % (bool) prints figures to PDF
+s.fig_folder = 'Figures/'; % (string) subfolder in which figures pdfs are saved
+s.fig_size = 0.75; % * 10 cm = vertical size of a figure
+
+printStartLog();
 
 %% Dry Operation
 % =========================================================================
@@ -80,11 +84,30 @@ s.verb1 = 0; % debugging
 % • provide a power balance;
 % • give the area of the exhaust nozzle.
 
+% -------------------------------------------------------------------------
+% Configuration
+% -------------------------------------------------------------------------
+[d.p, d.c] = config_dry; % dry (d), parameters (p) and configuration (c, should only be used for displaying)
+
+% -------------------------------------------------------------------------
+% Cycle
+% -------------------------------------------------------------------------
+% compressors
+d.r.p0_3 = d.p.Pi * d.p.p0_1;
+
+% combustion chamber
+[d.r.T0_3, d.r.T0_4] = combChamber(d.p.TiT, d.p.TiT, d.p.T0_r, 1, d.p.m_d_p - d.p.m_d_c, d.p.m_d_fcc, d.p.eta_cc, d.p.Deltah_f);
+d.r.p0_4 = d.r.p0_3 * (1 - d.p.cham_tot_press_loss);
 
 
+% coolant flow mixing
 
 
-
+% -------------------------------------------------------------------------
+% Printing results
+% -------------------------------------------------------------------------
+printEndLog();
+printOutput(d.c, d.p, d.r); % dry (d), parameters (p) and configuration (c, should only be used for displaying)
 
 
 
@@ -101,6 +124,13 @@ s.verb1 = 0; % debugging
 % • provide the converging nozzle throat area;
 % • supposing a converging-diverging nozzle is installed, compute the 
 %   increase in thrust and provide the outlet area.
+
+
+
+
+%% Printing results
+
+
 
 
 

@@ -16,6 +16,9 @@ function T0_3 = mixer(T0_1, T0_2, T0_r, FAR_1, FAR_2, m_d_1, m_d_2)
 %   T0_3        temperature after mixing
 %
 
+disp('............................................')
+disp('<strong>MIXER</strong>')
+
 C_p_1 = findCp(T0_1 + T0_r, FAR_1);
 C_p_2 = findCp(T0_2 + T0_r, FAR_2);
 

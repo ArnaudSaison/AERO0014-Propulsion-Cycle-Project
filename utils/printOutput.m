@@ -42,5 +42,16 @@ disp(['p0_5p= ', sprintf(style, r.p0_5_duct/1e3), ' [kPa]', spacing, ...
 disp(['p0_6 = ', sprintf(style, r.p0_6/1e3), ' [kPa]', spacing, ...
       'T0_6 = ', sprintf(style, r.T0_6), ' [K]'])
 
+disp(['p0_7 = ', sprintf(style, r.p0_7/1e3), ' [kPa]', spacing, ...
+      'T0_7 = ', sprintf(style, r.T0_7), ' [K]'])
+
+disp(['p0_8 = ', sprintf(style, r.p0_8/1e3), ' [kPa]', spacing, ...
+      'T0_8 = ', sprintf(style, r.T0_8), ' [K]'])
+
+disp(['p_8  = ', sprintf(style, r.p_8/1e3), ' [kPa]', spacing, ...
+      'T_8  = ', sprintf(style, r.T_8), ' [K]'])
+
+
+
 end
 

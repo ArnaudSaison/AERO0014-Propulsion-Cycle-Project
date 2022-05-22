@@ -95,52 +95,64 @@ printStartLog();
 % -------------------------------------------------------------------------
 % Cycle
 % -------------------------------------------------------------------------
-% compressors
+% compressors ..............................
 d.r.p0_3 = d.p.Pi * d.p.p0_1;
 
-% combustion chamber
+% combustion chamber .......................
 [d.r.T0_3, d.r.T0_4] = combChamber(d.p.TiT, d.p.TiT, d.p.T0_r, 1, d.p.m_d_p - d.p.m_d_c, d.p.m_d_fcc, d.p.eta_cc, d.p.Deltah_f);
 d.r.p0_4 = d.r.p0_3 * (1 - d.p.cham_tot_press_loss);
 
-% coolant flow mixing
+% coolant flow mixing ......................
 d.r.T0_4_turb = mixer(d.r.T0_3, d.r.T0_4, d.p.T0_r, 0, d.p.m_d_fcc / (d.p.m_d_p - d.p.m_d_c), d.p.m_d_c, d.p.m_d_p);
 d.r.p0_4_turb = d.r.p0_4;
 
-% compressor
-d.i.pi_c = 2; % guess
+% compressor ...............................
+d.i.pi_c = 3.85; % guess
 d.r.p0_2 = d.i.pi_c * d.p.p0_1;
 
-[d.r.T0_2, d.r.eta_cs, d.r.P_c] = compressor(d.p.T0_1, d.r.T0_3, d.p.Pi, d.p.gamma, d.i.pi_c, d.p.m_d_p)
+[d.r.T0_2, d.r.eta_cs, d.r.P_c] = compressor(d.p.T0_1, d.r.T0_3, d.p.Pi, d.p.gamma, d.i.pi_c, d.p.m_d_p, d.p.m_d_a);
 
-% turbine
+% turbine ..................................
 d.r.P_t = d.r.P_c / d.p.eta_t;
-d.r.T0_5 = turbine(d.r.T0_4_turb, d.p.m_d_p, d.p.m_d_fcc, d.r.P_t, d.p.R)
+[d.r.T0_5, d.r.C_p_t] = turbine(d.r.T0_4_turb, d.p.m_d_p, d.p.m_d_fcc, d.r.P_t, d.p.R);
 
-% duct
+% duct .....................................
 d.r.T0_5_duct = d.r.T0_2;
 d.r.p0_5_duct = d.r.p0_2 * (1 - d.p.duct_tot_press_loss);
 d.r.p0_5 = d.r.p0_5_duct;
 
-% mixer
-d.r.T0_6 = mixer(d.r.T0_5_duct, d.r.T0_5, d.p.T0_r, 0, d.p.m_d_fcc / d.p.m_d_p, d.p.m_d_s, d.p.m_d_p + d.p.m_d_fcc)
+% turbine expansion ratio and iso-s eff
+d.r.pi_t = d.r.p0_4_turb/d.r.p0_5;
+d.r.eta_ts = turbIsoSEff(d.r.pi_t, d.r.T0_4_turb, d.r.T0_5, d.r.C_p_t, d.p.R);
+
+% mixer ....................................
+d.r.T0_6 = mixer(d.r.T0_5_duct, d.r.T0_5, d.p.T0_r, 0, d.p.m_d_fcc / d.p.m_d_p, d.p.m_d_s, d.p.m_d_p + d.p.m_d_fcc);
 d.r.p0_6 = d.r.p0_5 * (1 - d.p.mixe_tot_press_loss);
 
-% dry afterburner
-d.r.T0_7 = d.r.p0_6;
-d.r.p0_7 = d.r.T0_6;
+% dry afterburner ..........................
+d.r.T0_7 = d.r.T0_6;
+d.r.p0_7 = d.r.p0_6;
 
-% nozzle (isentropic => same tot temp and press)
-d.r.T0_7 = d.r.p0_6;
-d.r.p0_7 = d.r.T0_6;
+% nozzle ...................................
+% (isentropic => same tot temp and press)
+d.r.p0_8 = d.r.p0_7;
+d.r.T0_8 = d.r.T0_7;
+
+% p0_1 = p_1 since v_0 = 0
+[d.r.A_ex, d.r.v_8, d.r.p_8, d.r.T_8] = convNozzle(d.p.p0_1, d.r.p0_7 , d.r.T0_7, d.p.v_0, d.p.m_d_a, d.p.m_d_fcc, d.p.gamma, d.p.R, d.p.iter.tol, d.p.iter.max);
+
+% thrust ...................................
+d.r.T = thrust(d.p.m_d_a, d.p.m_d_fcc, d.r.v_8, d.p.v_0, d.r.p_8, d.p.p0_1, d.r.A_ex);
 
 
 
+d.r.pi_c = d.i.pi_c;
 
 % -------------------------------------------------------------------------
 % Printing results
 % -------------------------------------------------------------------------
 printEndLog();
-printOutput(d.c, d.p, d.r); % dry (d), parameters (p) and configuration (c, should only be used for displaying)
+printDry(d.c, d.p, d.r); % dry (d), parameters (p) and configuration (c, should only be used for displaying)
 
 
 

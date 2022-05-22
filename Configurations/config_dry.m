@@ -16,7 +16,7 @@ function [par, config] = config_dry()
 
 config.operation = 'dry';
 
-% configameters
+% Configameters
 config.Deltah_f = 42.8e6; % [J/kg] fuel lower heating value
 config.Pi = 24.5; % [-] overall pressure ratio
 config.m_d_a = 65; % [kg/s] total air mass flow rate
@@ -36,6 +36,10 @@ config.eta_t = 1; % [-] turbine efficiency
 
 % Physical constants
 config = constants(config);
+
+% Iterations parameters
+config.iter.tol = 1e-10; % not used everywhere!
+config.iter.max = 50; % not used everywhere!
 
 % Processing the configuration for use in code
 par = processConfig(config);

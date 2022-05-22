@@ -20,11 +20,13 @@ function [res_T0_1, res_T0_2] = combChamber(T0_1, T0_2, T0_r, asmpt, m_d_a, m_d_
 % Calls: findCp, fsolve
 %
 
-FAR = m_d_f / m_d_a
+% function
+FAR = m_d_f / m_d_a;
 cc_eq =@(T0_1_var, T0_2_var)    (m_d_a * findCp((T0_1_var+T0_r)/2, FAR) * (T0_1_var-T0_r) + eta_cc * Dh_f * m_d_f) ...
                                 / ((m_d_a + m_d_f) * findCp((T0_2_var+T0_r)/2, FAR))...
                                 + T0_r - T0_2_var;
 
+% two cases
 if asmpt == 1   % if the assumption is T0_1
     cc_eq_1 =@(x) cc_eq(x, T0_2);
     res_T0_1 = fsolve(cc_eq_1, T0_1-100);

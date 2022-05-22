@@ -18,7 +18,8 @@
 %       function of temperature and fuel-to-air-ratio, as well as the fuel
 %       lower heating value ∆hf = 42.8 MJ/kg."
 %   
-%   Denominations for the cycle stations (as required by the statement):
+%   Denominations for the cycle stations (as required by the statement with
+%   4p station added for clarity):
 %       1  upstream of the LP compressor
 %       2  downstream of the LPC / upstream of the HPC / inlet of the 
 %          secondary flow duct; 
@@ -31,6 +32,8 @@
 %       6  outlet of the mixer / inlet of the afterburner;
 %       7  outlet of the afterburner / entry of the nozzle;
 %       8  nozzle outlet.
+%
+%   Please note that outside the configuration file, all units are in SI.
 %
 % User Guide:
 %   Each section solves one part of the assignment. Use the Run Section
@@ -99,8 +102,38 @@ d.r.p0_3 = d.p.Pi * d.p.p0_1;
 [d.r.T0_3, d.r.T0_4] = combChamber(d.p.TiT, d.p.TiT, d.p.T0_r, 1, d.p.m_d_p - d.p.m_d_c, d.p.m_d_fcc, d.p.eta_cc, d.p.Deltah_f);
 d.r.p0_4 = d.r.p0_3 * (1 - d.p.cham_tot_press_loss);
 
-
 % coolant flow mixing
+d.r.T0_4_turb = mixer(d.r.T0_3, d.r.T0_4, d.p.T0_r, 0, d.p.m_d_fcc / (d.p.m_d_p - d.p.m_d_c), d.p.m_d_c, d.p.m_d_p);
+d.r.p0_4_turb = d.r.p0_4;
+
+% compressor
+d.i.pi_c = 2; % guess
+d.r.p0_2 = d.i.pi_c * d.p.p0_1;
+
+[d.r.T0_2, d.r.eta_cs, d.r.P_c] = compressor(d.p.T0_1, d.r.T0_3, d.p.Pi, d.p.gamma, d.i.pi_c, d.p.m_d_p)
+
+% turbine
+d.r.P_t = d.r.P_c / d.p.eta_t;
+d.r.T0_5 = turbine(d.r.T0_4_turb, d.p.m_d_p, d.p.m_d_fcc, d.r.P_t, d.p.R)
+
+% duct
+d.r.T0_5_duct = d.r.T0_2;
+d.r.p0_5_duct = d.r.p0_2 * (1 - d.p.duct_tot_press_loss);
+d.r.p0_5 = d.r.p0_5_duct;
+
+% mixer
+d.r.T0_6 = mixer(d.r.T0_5_duct, d.r.T0_5, d.p.T0_r, 0, d.p.m_d_fcc / d.p.m_d_p, d.p.m_d_s, d.p.m_d_p + d.p.m_d_fcc)
+d.r.p0_6 = d.r.p0_5 * (1 - d.p.mixe_tot_press_loss);
+
+% dry afterburner
+d.r.T0_7 = d.r.p0_6;
+d.r.p0_7 = d.r.T0_6;
+
+% nozzle (isentropic => same tot temp and press)
+d.r.T0_7 = d.r.p0_6;
+d.r.p0_7 = d.r.T0_6;
+
+
 
 
 % -------------------------------------------------------------------------
@@ -108,7 +141,6 @@ d.r.p0_4 = d.r.p0_3 * (1 - d.p.cham_tot_press_loss);
 % -------------------------------------------------------------------------
 printEndLog();
 printOutput(d.c, d.p, d.r); % dry (d), parameters (p) and configuration (c, should only be used for displaying)
-
 
 
 

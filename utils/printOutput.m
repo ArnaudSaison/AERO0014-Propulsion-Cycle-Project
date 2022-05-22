@@ -11,22 +11,36 @@ function printOutput(c, p, r)
 % Calls: -
 %
 
+style = '%-8.2f';
+spacing = '    ';
+
 disp(' ')
 disp(' ')
 disp(['Cycle under <strong>', c.operation, '</strong> operation'])
 disp('--------------------------------------------')
-disp(['p0_1 = ', num2str(p.p0_1/1e3, '%-12.2f'), ' [kPa]'])
-disp(['T0_1 = ', num2str(p.T0_1, '%-12.2f'), ' [K]'])
-disp(' ')
+disp(['p0_1 = ', sprintf(style, p.p0_1/1e3), ' [kPa]', spacing, ...
+      'T0_1 = ', sprintf(style, p.T0_1), ' [K]'])
 
-disp(['p0_3 = ', num2str(r.p0_3/1e3, '%-12.2f'), ' [kPa]'])
-disp(['T0_3 = ', num2str(r.T0_3, '%-12.2f'), ' [K]'])
-disp(' ')
+disp(['p0_2 = ', sprintf(style, r.p0_2/1e3), ' [kPa]', spacing, ...
+      'T0_2 = ', sprintf(style, r.T0_2), ' [K]'])
 
-disp(['p0_4 = ', num2str(r.p0_4/1e3, '%-12.2f'), ' [kPa]'])
-disp(['T0_4 = ', num2str(r.T0_4, '%-12.2f'), ' [K]'])
-disp(' ')
+disp(['p0_3 = ', sprintf(style, r.p0_3/1e3), ' [kPa]', spacing, ...
+      'T0_3 = ', sprintf(style, r.T0_3), ' [K]'])
 
+disp(['p0_4 = ', sprintf(style, r.p0_4/1e3), ' [kPa]', spacing, ...
+      'T0_4 = ', sprintf(style, r.T0_4), ' [K]'])
+
+disp(['p0_4p= ', sprintf(style, r.p0_4_turb/1e3), ' [kPa]', spacing, ...
+      'T0_4p= ', sprintf(style, r.T0_4_turb), ' [K]'])
+
+disp(['p0_5 = ', sprintf(style, r.p0_5/1e3), ' [kPa]', spacing, ...
+      'T0_5 = ', sprintf(style, r.T0_5), ' [K]'])
+
+disp(['p0_5p= ', sprintf(style, r.p0_5_duct/1e3), ' [kPa]', spacing, ...
+      'T0_5p= ', sprintf(style, r.T0_5_duct), ' [K]'])
+
+disp(['p0_6 = ', sprintf(style, r.p0_6/1e3), ' [kPa]', spacing, ...
+      'T0_6 = ', sprintf(style, r.T0_6), ' [K]'])
 
 end
 

@@ -14,7 +14,7 @@ function [par, config] = config_wet()
 %   utils/processConfig.m
 %
 
-config.operation = "wet";
+config.operation = 'wet';
 
 % Configameters
 config.Deltah_f = 42.8e6; % [J/kg] fuel lower heating value

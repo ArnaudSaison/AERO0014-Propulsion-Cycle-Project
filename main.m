@@ -159,21 +159,25 @@ d.r.pi_LPC = d.p.pi_LPC;
 w.r.T0_2 = d.r.T0_2;
 w.r.T0_3 = d.r.T0_3;
 w.r.T0_4 = d.r.T0_4;
+w.r.T0_4_turb = d.r.T0_4_turb;
 w.r.T0_5 = d.r.T0_5;
+w.r.T0_5_duct = d.r.T0_5_duct;
 w.r.T0_6 = d.r.T0_6;
 
 w.r.p0_2 = d.r.p0_2;
 w.r.p0_3 = d.r.p0_3;
 w.r.p0_4 = d.r.p0_4;
+w.r.p0_4_turb = d.r.p0_4_turb;
 w.r.p0_5 = d.r.p0_5;
+w.r.p0_5_duct = d.r.p0_5_duct;
 w.r.p0_6 = d.r.p0_6;
 
 % Iteration to find the correct pressure loss in afterburner
-w.i.lambda_ab_lims = [0.00, 0.20]; % first guess
+w.i.lambda_ab_lims = [0.05, 0.15]; % first guess
 w.r.T_wet = 0; % initialization
 w.i.iter = 1;
 
-while abs(w.p.T - w.r.T_wet) > w.p.iter.tol && w.i.iter <= w.p.iter.max
+while abs(w.p.T_wet - w.r.T_wet) > w.p.iter.tol && w.i.iter <= w.p.iter.max
     % initalizing iteration ....................
     w.i.lambda_ab = (w.i.lambda_ab_lims(1) + w.i.lambda_ab_lims(2)) / 2;
     w.p.lambda_ab = w.i.lambda_ab;
@@ -181,10 +185,10 @@ while abs(w.p.T - w.r.T_wet) > w.p.iter.tol && w.i.iter <= w.p.iter.max
     printLogIter(w.i.iter, w.i.lambda_ab);
 
     % run cycle ................................
-    [w.p, w.c, w.r] = WETcycleOperation(w.p, w.c);
+    [w.p, w.c, w.r] = WETcycleOperation(w.p, w.c, w.r);
 
     % checking iteration .......................
-    if w.p.T > w.r.T
+    if w.p.T_wet > w.r.T_wet
         w.i.lambda_ab_lims(2) = w.i.lambda_ab;
     else 
         w.i.lambda_ab_lims(1) = w.i.lambda_ab;
@@ -194,7 +198,7 @@ while abs(w.p.T - w.r.T_wet) > w.p.iter.tol && w.i.iter <= w.p.iter.max
 
 end
 
-if abs(w.p.T - w.r.T_wet) > w.p.iter.tol
+if abs(w.p.T_wet - w.r.T_wet) > w.p.iter.tol
     warning('No solution found for lambda_ab');
 end
 
@@ -209,7 +213,7 @@ printDry(d.c, d.p, d.r); % dry (d), parameters (p) and configuration (c, should 
 
 
 % WET
-printVSpace();
+printVSpace(5);
 printWet(w.c, w.p, w.r);
 
 

@@ -19,11 +19,11 @@ function T0_3 = mixer(T0_1, T0_2, T0_r, FAR_1, FAR_2, m_d_1, m_d_2)
 disp('............................................')
 disp('<strong>MIXER</strong>')
 
-C_p_1 = findCp(T0_1 + T0_r, FAR_1);
-C_p_2 = findCp(T0_2 + T0_r, FAR_2);
+C_p_1 = findCp((T0_1 + T0_r)/2, FAR_1);
+C_p_2 = findCp((T0_2 + T0_r)/2, FAR_2);
 
 mix_eq =@(T0_3_var)  T0_r - T0_3_var + (m_d_1 * C_p_1 * (T0_1 - T0_r) + m_d_2 * C_p_2 * (T0_2 - T0_r)) ...
-                     /((m_d_1 + m_d_2) * findCp(T0_3_var + T0_r, (FAR_1*m_d_1 + FAR_2*m_d_2)/(m_d_1+m_d_2)));
+                     /((m_d_1 + m_d_2) * findCp((T0_3_var + T0_r)/2, (FAR_1*m_d_1 + FAR_2*m_d_2)/(m_d_1+m_d_2)));
 
 T0_3 = fsolve(mix_eq, (T0_1+T0_2)/2);
 

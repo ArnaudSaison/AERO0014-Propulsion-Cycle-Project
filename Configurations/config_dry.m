@@ -26,19 +26,21 @@ config.TiT = 1850; % [K] turbine inlet temperature
 config.SFC_cc = 0.8; % [kg/daN.h] thrust specific fuel consumption in the combustion chamber
 config.SFC_ab = 0; % [kg/daN.h] thrust specific fuel consumption in the afterburner
 config.T = 11250; % [lbf] thrust
+config.T_wet = 16860; % [lbf] thrust
 
 % Assumptions
 config.duct_tot_press_loss = 0.02; % [-] total pressure loss un secondary
-config.cham_tot_press_loss = 0.03; % [-] total chamber pressure pressure loss
+config.cham_tot_press_loss = 0.03; % [-] total combustion chamber pressure loss
 config.mixe_tot_press_loss = 0.03; % [-] mixing total pressure loss wrt common tot pres loss at mixer inlet (dry conditions)
 config.eta_cc = 1; % [-] combustion efficiency
+config.eta_ab = 1; % [-] combustion efficiency
 config.eta_t = 1; % [-] turbine efficiency
 
 % Physical constants
 config = constants(config);
 
 % Iterations parameters
-config.iter.tol = 1e-10; % not used everywhere!
+config.iter.tol = 1e-7; % not used everywhere!
 config.iter.max = 50; % not used everywhere!
 
 % Processing the configuration for use in code

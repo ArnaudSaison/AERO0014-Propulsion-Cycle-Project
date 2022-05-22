@@ -1,4 +1,4 @@
-function [T0_2, eta_cs, P_c] = compressor(T0_1, T0_3, Pi, gam, pi_c, m_d_p, m_d_a)
+function [T0_2, eta_cs, P_c] = compressor(T0_1, T0_3, Pi, gam, pi_LPC, m_d_p, m_d_a)
 %COMPRESSOR computes the compressor exit temperature, power and iso-s eff
 %   
 % Inputs:
@@ -6,7 +6,7 @@ function [T0_2, eta_cs, P_c] = compressor(T0_1, T0_3, Pi, gam, pi_c, m_d_p, m_d_
 %   T0_1        temperature 2
 %   Pi          pressure ratio
 %   gam         adiabatic index
-%   pi_c        compressor pressure ratio
+%   pi_LPC        compressor pressure ratio
 %   m_d_p       primary mass flow rate
 %   m_d_a       total mass flow rate
 %
@@ -22,11 +22,19 @@ disp('<strong>COMPRESSOR</strong>')
 % Computing the isentropic efficiency
 eta_cs = compIsoSEff(T0_1, T0_3, Pi, gam);
 
-% isentropic temperature
-T0_2s = T0_1 * pi_c^((gam-1)/gam);
+% polytropic efficiency because it is constant accross stages
+eta_cp = log(Pi) / log(T0_3/T0_1) * (gam-1)/gam;
 
-% using another definition of the isentropic efficiency
-T0_2 = (T0_2s - T0_1) / eta_cs + T0_1;
+T0_2 = T0_1 * pi_LPC^((gam-1)/(gam * eta_cp));
+
+% % can thus be used to find for LPC only
+% eta_LPCs = 
+
+% % isentropic temperature
+% T0_2s = T0_1 * pi_LPC^((gam-1)/gam);
+% 
+% % using another definition of the isentropic efficiency
+% T0_2 = (T0_2s - T0_1) / eta_cs + T0_1;
 
 % !!! 2 compressors !!!
 % C_p

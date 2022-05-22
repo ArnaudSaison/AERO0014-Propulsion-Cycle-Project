@@ -95,66 +95,43 @@ printStartLog();
 % -------------------------------------------------------------------------
 % Cycle
 % -------------------------------------------------------------------------
-% compressors ..............................
-d.r.p0_3 = d.p.Pi * d.p.p0_1;
+% Using the bissection method to find the LPC
 
-% combustion chamber .......................
-[d.r.T0_3, d.r.T0_4] = combChamber(d.p.TiT, d.p.TiT, d.p.T0_r, 1, d.p.m_d_p - d.p.m_d_c, d.p.m_d_fcc, d.p.eta_cc, d.p.Deltah_f);
-d.r.p0_4 = d.r.p0_3 * (1 - d.p.cham_tot_press_loss);
+d.i.pi_LPC_lims = [3, 5]; % first guess
+d.r.T = 0; % initialization
+d.i.iter = 1;
 
-% coolant flow mixing ......................
-d.r.T0_4_turb = mixer(d.r.T0_3, d.r.T0_4, d.p.T0_r, 0, d.p.m_d_fcc / (d.p.m_d_p - d.p.m_d_c), d.p.m_d_c, d.p.m_d_p);
-d.r.p0_4_turb = d.r.p0_4;
+while abs(d.p.T - d.r.T) > d.p.iter.tol && d.i.iter <= d.p.iter.max
+    % initalizing iteration ....................
+    d.i.pi_LPC = (d.i.pi_LPC_lims(1) + d.i.pi_LPC_lims(2)) / 2;
+    d.p.pi_LPC = d.i.pi_LPC;
 
-% compressor ...............................
-d.i.pi_c = 3.85; % guess
-d.r.p0_2 = d.i.pi_c * d.p.p0_1;
+    printLogIter(d.i.iter, d.i.pi_LPC);
 
-[d.r.T0_2, d.r.eta_cs, d.r.P_c] = compressor(d.p.T0_1, d.r.T0_3, d.p.Pi, d.p.gamma, d.i.pi_c, d.p.m_d_p, d.p.m_d_a);
+    % run cycle ................................
+    [d.p, d.c, d.r] = DRYcycleOperation(d.p, d.c);
 
-% turbine ..................................
-d.r.P_t = d.r.P_c / d.p.eta_t;
-[d.r.T0_5, d.r.C_p_t] = turbine(d.r.T0_4_turb, d.p.m_d_p, d.p.m_d_fcc, d.r.P_t, d.p.R);
+    % checking iteration .......................
+    if d.p.T > d.r.T
+        d.i.pi_LPC_lims(1) = d.i.pi_LPC;
+    else 
+        d.i.pi_LPC_lims(2) = d.i.pi_LPC;
+    end
 
-% duct .....................................
-d.r.T0_5_duct = d.r.T0_2;
-d.r.p0_5_duct = d.r.p0_2 * (1 - d.p.duct_tot_press_loss);
-d.r.p0_5 = d.r.p0_5_duct;
+    d.i.iter = d.i.iter + 1;
 
-% turbine expansion ratio and iso-s eff
-d.r.pi_t = d.r.p0_4_turb/d.r.p0_5;
-d.r.eta_ts = turbIsoSEff(d.r.pi_t, d.r.T0_4_turb, d.r.T0_5, d.r.C_p_t, d.p.R);
+end
 
-% mixer ....................................
-d.r.T0_6 = mixer(d.r.T0_5_duct, d.r.T0_5, d.p.T0_r, 0, d.p.m_d_fcc / d.p.m_d_p, d.p.m_d_s, d.p.m_d_p + d.p.m_d_fcc);
-d.r.p0_6 = d.r.p0_5 * (1 - d.p.mixe_tot_press_loss);
+if abs(d.p.T - d.r.T) > d.p.iter.tol
+    warning('No solution found for pi_LPC');
+end
 
-% dry afterburner ..........................
-d.r.T0_7 = d.r.T0_6;
-d.r.p0_7 = d.r.p0_6;
+d.r.pi_LPC = d.p.pi_LPC;
 
-% nozzle ...................................
-% (isentropic => same tot temp and press)
-d.r.p0_8 = d.r.p0_7;
-d.r.T0_8 = d.r.T0_7;
-
-% p0_1 = p_1 since v_0 = 0
-[d.r.A_ex, d.r.v_8, d.r.p_8, d.r.T_8] = convNozzle(d.p.p0_1, d.r.p0_7 , d.r.T0_7, d.p.v_0, d.p.m_d_a, d.p.m_d_fcc, d.p.gamma, d.p.R, d.p.iter.tol, d.p.iter.max);
-
-% thrust ...................................
-d.r.T = thrust(d.p.m_d_a, d.p.m_d_fcc, d.r.v_8, d.p.v_0, d.r.p_8, d.p.p0_1, d.r.A_ex);
-
-
-
-d.r.pi_c = d.i.pi_c;
-
-% -------------------------------------------------------------------------
-% Printing results
-% -------------------------------------------------------------------------
-printEndLog();
-printDry(d.c, d.p, d.r); % dry (d), parameters (p) and configuration (c, should only be used for displaying)
-
-
+% d.p.pi_LPC = 3.745;
+% [d.p, d.c, d.r] = cycleOperation(d.p, d.c);
+% 
+% d.r.pi_LPC = d.p.pi_LPC;
 
 
 %% Wet Operation
@@ -169,11 +146,71 @@ printDry(d.c, d.p, d.r); % dry (d), parameters (p) and configuration (c, should 
 % • supposing a converging-diverging nozzle is installed, compute the 
 %   increase in thrust and provide the outlet area.
 
+% -------------------------------------------------------------------------
+% Configuration
+% -------------------------------------------------------------------------
+[w.p, w.c] = config_wet; % dry (d), parameters (p) and configuration (c, should only be used for displaying)
 
+
+% -------------------------------------------------------------------------
+% Cycle
+% -------------------------------------------------------------------------
+% operation unmodified before the efterburner
+w.r.T0_2 = d.r.T0_2;
+w.r.T0_3 = d.r.T0_3;
+w.r.T0_4 = d.r.T0_4;
+w.r.T0_5 = d.r.T0_5;
+w.r.T0_6 = d.r.T0_6;
+
+w.r.p0_2 = d.r.p0_2;
+w.r.p0_3 = d.r.p0_3;
+w.r.p0_4 = d.r.p0_4;
+w.r.p0_5 = d.r.p0_5;
+w.r.p0_6 = d.r.p0_6;
+
+% Iteration to find the correct pressure loss in afterburner
+w.i.lambda_ab_lims = [0.00, 0.20]; % first guess
+w.r.T_wet = 0; % initialization
+w.i.iter = 1;
+
+while abs(w.p.T - w.r.T_wet) > w.p.iter.tol && w.i.iter <= w.p.iter.max
+    % initalizing iteration ....................
+    w.i.lambda_ab = (w.i.lambda_ab_lims(1) + w.i.lambda_ab_lims(2)) / 2;
+    w.p.lambda_ab = w.i.lambda_ab;
+
+    printLogIter(w.i.iter, w.i.lambda_ab);
+
+    % run cycle ................................
+    [w.p, w.c, w.r] = WETcycleOperation(w.p, w.c);
+
+    % checking iteration .......................
+    if w.p.T > w.r.T
+        w.i.lambda_ab_lims(2) = w.i.lambda_ab;
+    else 
+        w.i.lambda_ab_lims(1) = w.i.lambda_ab;
+    end
+
+    w.i.iter = w.i.iter + 1;
+
+end
+
+if abs(w.p.T - w.r.T_wet) > w.p.iter.tol
+    warning('No solution found for lambda_ab');
+end
+
+w.r.lambda_ab = w.p.lambda_ab;
 
 
 %% Printing results
+% =========================================================================
+% DRY
+printEndLog();
+printDry(d.c, d.p, d.r); % dry (d), parameters (p) and configuration (c, should only be used for displaying)
 
+
+% WET
+printVSpace();
+printWet(w.c, w.p, w.r);
 
 
 

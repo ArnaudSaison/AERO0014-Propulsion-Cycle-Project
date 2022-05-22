@@ -10,7 +10,8 @@ function config = constants(config)
 % Calls: -
 %
 
-ISA_values = 1; % 1 if using ISA values / 0 if not
+ISA_values = 0; % 1 if using ISA values / 0 if not
+altitude = 0; % altitude for ISA values only
 
 % physical
 config.R = 287.15; % [J/kg.K] perfect gas constant
@@ -20,10 +21,18 @@ config.T0_r = 288.15; % [K] temperature reference for C_p
 
 % exterior conditions
 if ISA_values == 1
-    
+
+    % atmosisa toolbox
+    [T, ~, P, ~] = atmosisa(altitude);
+
+    % setting values
+    config.p0_1 = P; % [Pa] atmospheric pressure
+    config.T0_1 = T; % [K] atmospheric temperature
+
 else
+
     config.p0_1 = 101325; % [Pa] atmospheric pressure
-    config.T0_1 = 273.15 + 25; % [K] atmospheric temperature
+    config.T0_1 = 273.15 + 15; % [K] atmospheric temperature
 
 end
 

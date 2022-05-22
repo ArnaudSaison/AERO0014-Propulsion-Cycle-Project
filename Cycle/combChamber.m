@@ -1,4 +1,4 @@
-function [res_T0_1, res_T0_2] = combChamber(T0_1, T0_2, T0_r, asmpt, m_d_a, m_d_f, eta_cc, Dh_f)%, tol, max_iter)
+function [res_T0_1, res_T0_2] = combChamber(T0_1, T0_2, T0_r, asmpt, m_d_a, m_d_f, eta_cc, Dh_f, FAR_in, FAR_out)%, tol, max_iter)
 %combChamber finds the temperatures at the entrance and exit of 
 %
 % Inputs:
@@ -24,9 +24,8 @@ disp('............................................')
 disp('<strong>COMBUSTION CHAMBER</strong>')
 
 % function
-FAR = m_d_f / m_d_a;
-cc_eq =@(T0_1_var, T0_2_var)    (m_d_a * findCp((T0_1_var+T0_r)/2, FAR) * (T0_1_var-T0_r) + eta_cc * Dh_f * m_d_f) ...
-                                / ((m_d_a + m_d_f) * findCp((T0_2_var+T0_r)/2, FAR))...
+cc_eq =@(T0_1_var, T0_2_var)    (m_d_a * findCp((T0_1_var+T0_r)/2, FAR_in) * (T0_1_var-T0_r) + eta_cc * Dh_f * m_d_f) ...
+                                / ((m_d_a + m_d_f) * findCp((T0_2_var+T0_r)/2, FAR_out))...
                                 + T0_r - T0_2_var;
 
 % two cases
